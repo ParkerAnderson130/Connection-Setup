@@ -1,8 +1,12 @@
-import websocket
 import json
+import os
+import random
 import time
 import threading
-import random
+import websocket
+from dotenv import load_dotenv
+load_dotenv()
+from printer import Printer
 
 websocket.enableTrace(False)
 
@@ -44,7 +48,7 @@ def send_single_message(ws):
         "epoch_time": int(time.time()),
         "data": {
             "temperature_one": {
-                "degrees_celsius": random.randint(30, 60)
+                "degrees_celsius": 1 # random.randint(30, 60)
             },
         }
     }
@@ -59,7 +63,7 @@ def send_single_message(ws):
     except Exception as e:
         print(f"Error sending message: {e}")
     finally:
-        time.sleep(5)  # Wait to observe any server response before closing
+        time.sleep(5) # Wait to observe any server response before closing
         if ws.sock and ws.sock.connected:
             ws.close()
         else:
@@ -68,7 +72,7 @@ def send_single_message(ws):
 if __name__ == "__main__":
     uri = "wss://stream-digitaltwin.com/machine" # "ws://0.0.0.0:8081/machine"
     headers = {
-        "x-api-key": "sUjpcMXAJM84OTcIcS9tn7czv7Ew4X8C9QCEUeKw",
+        "x-api-key": os.getenv("APIKEY"),
         "role": "PRIMARY",
         "id": "8hadma98t2"
     }

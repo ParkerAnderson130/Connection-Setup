@@ -1,8 +1,12 @@
 # main.py
+
 import json
+import os
 import time
 import threading
 import websocket
+from dotenv import load_dotenv
+load_dotenv()
 from printer import Printer
 
 # WebSocket functions
@@ -26,7 +30,7 @@ def send_single_message(ws, initial):
         "machine_type": "3D_PRINTER",
         "gcode": True,
         "sensors": {
-            "temperature_main": {
+            "temperature_one": {
                 "display_name": "Primary Temperature Sensor",
                 "sensor_type": "TEMPERATURE",
                 "metrics": {
@@ -43,7 +47,7 @@ def send_single_message(ws, initial):
         "action": "upload_data",
         "epoch_time": int(time.time()),
         "data": {
-            "temperature_main": {
+            "temperature_one": {
                 "degrees_celsius": printer.getTemperature()
             }
         }
@@ -76,7 +80,7 @@ if __name__ == "__main__":
     # WebSocket setup
     uri = "wss://stream-digitaltwin.com/machine"
     headers = {
-        "x-api-key": "sUjpcMXAJM84OTcIcS9tn7czv7Ew4X8C9QCEUeKw",
+        "x-api-key": os.getenv("APIKEY"),
         "role": "PRIMARY",
         "id": "8hadma98t2"
     }
