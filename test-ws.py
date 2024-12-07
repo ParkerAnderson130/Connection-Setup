@@ -48,6 +48,8 @@ def send_single_message(ws):
             },
         }
     }
+
+    '''
     data = {
         "action": "upload_data",
         "epoch_time": int(time.time()),
@@ -57,6 +59,7 @@ def send_single_message(ws):
             },
         }
     }
+    '''
     
     try:
         # Check if the WebSocket is open before sending
@@ -75,7 +78,7 @@ def send_single_message(ws):
             print("WebSocket already closed or disconnected.")
 
 if __name__ == "__main__":
-    uri = "wss://stream-digitaltwin.com/machine" # "ws://0.0.0.0:8081/machine"
+    uri = "wss://stream-digitaltwin.com/machine" #"ws://0.0.0.0:8081/machine"
     headers = {
         "x-api-key": os.getenv("APIKEY"),
         "role": "PRIMARY",

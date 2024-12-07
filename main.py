@@ -1,4 +1,4 @@
-# main.py
+#main.py
 
 import json
 import os
@@ -24,11 +24,11 @@ def on_error(ws, error):
 def on_close(ws, close_status_code, close_msg):
     print(f"WebSocket closed with code: {close_status_code}, message: {close_msg}")
 
-def on_open(ws, initial=True):
+def on_open(ws):
     print("Connected to WebSocket server")
-    threading.Timer(0.5, send_single_message, args=(ws, initial)).start()
+    threading.Thread(target=send_multiple_messages, args=(ws,)).start()
 
-def send_single_message(ws, initial):
+def send_multiple_messages(ws):
     set_info = {
         "action": "set_info",
         "display_name": "UGA Printer",
@@ -48,30 +48,32 @@ def send_single_message(ws, initial):
         }
     }
 
-    update_data = {
-        "action": "upload_data",
-        "epoch_time": int(time.time()),
-        "data": {
-            "temperature_one": {
-                "degrees_celsius": printer.getTemperature()
-            }
-        }
-    }
-
     try:
+        # Send the initial "set_info" packet
         if ws.sock and ws.sock.connected:
-            if initial:
-                ws.send(json.dumps(set_info))
-                print(f"Sent message: {set_info}")
-            else:
-                ws.send(json.dumps(update_data))
-                print(f"Sent message: {update_data}")
+            ws.send(json.dumps(set_info))
+            print(f"Sent message: {set_info}")
         else:
             print("WebSocket not connected.")
+
+        # Send "upload_data" packets to update STREAM
+        while ws.sock and ws.sock.connected:
+            update_data = {
+                "action": "upload_data",
+                "epoch_time": int(time.time()),
+                "data": {
+                    "temperature_one": {
+                        "degrees_celsius": printer.getTemperature()
+                    }
+                }
+            }
+            ws.send(json.dumps(update_data))
+            print(f"Sent message: {update_data}")
+            time.sleep(5) # Send a new packet every 5 seconds
+
     except Exception as e:
         print(f"Error sending message: {e}")
     finally:
-        time.sleep(5)
         if ws.sock and ws.sock.connected:
             ws.close()
         else:
@@ -79,7 +81,7 @@ def send_single_message(ws, initial):
 
 if __name__ == "__main__":
     # Printer setup
-    printer = Printer(port="/dev/tty.usbmodem48EF754639541") # Replace with the actual port for the 3D printer
+    printer = Printer(port="/dev/tty.usbmodem48EF754639541") # UGA Printer port
     printer.connect()
 
     # WebSocket setup
@@ -92,7 +94,7 @@ if __name__ == "__main__":
 
     ws = websocket.WebSocketApp(uri,
                                 header=[f"{key}: {value}" for key, value in headers.items()],
-                                on_open=lambda ws: on_open(ws, initial=False), # Pass initial
+                                on_open=on_open,
                                 on_message=on_message,
                                 on_error=on_error,
                                 on_close=on_close)
@@ -100,5 +102,5 @@ if __name__ == "__main__":
     # Run the WebSocket connection
     ws.run_forever(sslopt={"context": ssl_context})
     
-    # Clean up printer connection on exit
+    # Close Printer connection 
     printer.close()
