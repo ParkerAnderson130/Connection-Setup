@@ -4,10 +4,15 @@ import json
 import os
 import time
 import threading
-import websocket
+import certifi
 from dotenv import load_dotenv
-load_dotenv()
+import ssl
+import websocket
+
 from printer import Printer
+
+load_dotenv()
+ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 # WebSocket functions
 def on_message(ws, message):
@@ -74,7 +79,7 @@ def send_single_message(ws, initial):
 
 if __name__ == "__main__":
     # Printer setup
-    printer = Printer(port="/dev/ttyUSB0") # Replace with the actual port for the 3D printer
+    printer = Printer(port="/dev/tty.usbmodem48EF754639541") # Replace with the actual port for the 3D printer
     printer.connect()
 
     # WebSocket setup
@@ -87,13 +92,13 @@ if __name__ == "__main__":
 
     ws = websocket.WebSocketApp(uri,
                                 header=[f"{key}: {value}" for key, value in headers.items()],
-                                on_open=lambda ws: on_open(ws, initial=True), # Pass initial
+                                on_open=lambda ws: on_open(ws, initial=False), # Pass initial
                                 on_message=on_message,
                                 on_error=on_error,
                                 on_close=on_close)
     
     # Run the WebSocket connection
-    ws.run_forever()
+    ws.run_forever(sslopt={"context": ssl_context})
     
     # Clean up printer connection on exit
     printer.close()
