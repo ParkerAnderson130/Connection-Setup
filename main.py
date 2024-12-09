@@ -29,6 +29,7 @@ def on_open(ws):
     threading.Thread(target=send_multiple_messages, args=(ws,)).start()
 
 def send_multiple_messages(ws):
+    ### 1. CHANGE DEVICE SPECIFIC INFORMATION HERE ###
     set_info = {
         "action": "set_info",
         "display_name": "UGA Printer",
@@ -47,6 +48,7 @@ def send_multiple_messages(ws):
             }
         }
     }
+    ###
 
     try:
         # Send the initial "set_info" packet
@@ -58,6 +60,7 @@ def send_multiple_messages(ws):
 
         # Send "upload_data" packets to update STREAM
         while ws.sock and ws.sock.connected:
+            ### 2. CHANGE DATA UPLOADED HERE ###
             update_data = {
                 "action": "upload_data",
                 "epoch_time": int(time.time()),
@@ -67,6 +70,7 @@ def send_multiple_messages(ws):
                     }
                 }
             }
+            ###
             ws.send(json.dumps(update_data))
             print(f"Sent message: {update_data}")
             time.sleep(5) # Send a new packet every 5 seconds
@@ -80,9 +84,10 @@ def send_multiple_messages(ws):
             print("WebSocket already closed or disconnected.")
 
 if __name__ == "__main__":
-    # Printer setup
+    ### 3. CHANGE DEVICE OBJECT HERE ###
     printer = Printer(port="/dev/tty.usbmodem48EF754639541") # UGA Printer port
     printer.connect()
+    ###
 
     # WebSocket setup
     uri = "wss://stream-digitaltwin.com/machine"
