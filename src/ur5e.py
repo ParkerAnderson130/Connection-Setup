@@ -1,5 +1,7 @@
+import ast
 import socket
 import time
+#from rtde_control import RTDEControlInterface
 
 from machine import Machine
 
@@ -11,25 +13,30 @@ class c:
 
 class UR5e(Machine):
     def __init__(self, host="192.168.1.10", port=30002):
-        super().__init__("Dummy Robot Arm")
+        super().__init__("UR5e Arm")
         self.host = host
         self.port = port
         self.sock = None
+        self.vel = 0.5
+        self.acc = 0.5
+        self.rtde_frequency = 500
+        self.ur_cap_port = 50002
 
     def connect(self):
         print(c.BLUE + f"CONNECTING TO UR5E AT {self.host}:{self.port}" + c.END)
-        '''
         try:
-            self.sock = socket.create_connection((self.host, self.port), timeout=10)
-            print(c.GREEN + f"CONNECTED TO UR5E" + c.END)
+            
+            #rtde_r = RTDEReceive(robot_ip, rtde_frequency)
+            #rtde_c = RTDEControl(robot_ip, rtde_frequency, RTDEControl.FLAG_VERBOSE | RTDEControl.FLAG_UPLOAD_SCRIPT, ur_cap_port)
+            return c.GREEN + "CONNECTED TO UR5E" + c.END
         except Exception as e:
-            print(c.RED + f"ERROR CONNECTING TO UR5E: {e}" + c.END)
-        '''
+            return c.RED + f"ERROR CONNECTING TO UR5E: {str(e)}" + c.END
+            
 
     def set_info(self):
         return {
             "action": "set_info",
-            "display_name": "UR5e Robotic Arm",
+            "display_name": "UR5e Arm",
             "machine_type": "ROBOTIC_ARM",
             "sensors": {
                 "tcp_position": {
@@ -104,13 +111,29 @@ class UR5e(Machine):
             }
         }
 
-    def send_command(self, command):
+    def send_command(self, command_str):
         if self.sock:
             try:
-                self.sock.sendall(command.encode() + b"\n")
-                time.sleep(0.1)
-                return "Command sent successfully"
+                '''
+                # Step 1: Extract function name and arguments
+                func_name = command_str.split("(")[0]
+                args_str = command_str[len(func_name):]
+                args = ast.literal_eval(args_str)
+
+                # Step 2: Validate method exists
+                if not hasattr(rtde_control, func_name):
+                    return c.RED + f"UNKNOWN COMMAND: {func_name}" + c.END
+
+                method = getattr(rtde_control, func_name)
+
+                # Step 3: Call method (wrap in list if needed)
+                if not isinstance(args, tuple):
+                    args = (args,)
+                
+                result = method(*args)
+                return c.GREEN + f"EXECUTED {func_name} WITH RESULT: {result}" + c.END
+                '''
             except Exception as e:
-                return e
+                return c.RED + f"ERROR EXECUTING COMMAND: {str(e)}" + c.END
         else:
-            return "Not connected"
+            return c.RED + "NOT CONNECTED" + c.END

@@ -22,7 +22,7 @@ end
 """
 
 def send_ur_command(command: str, ip: str, port: int):
-    """Send a URScript command to the UR5e robot via TCP socket."""
+    """Send a URScript command to the UR5e arm via TCP socket."""
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.settimeout(2)  # Timeout in seconds

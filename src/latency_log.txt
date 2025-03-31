@@ -1,0 +1,2 @@
+2025-03-27 13:27:34 | Action: set_info | Latency: 0.0232 seconds
+2025-03-27 13:27:34 | Action: upload_data | Latency: 0.0258 seconds

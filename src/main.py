@@ -9,6 +9,7 @@ import time
 import threading
 import ssl
 import websocket
+from websocket import WebSocketApp
 
 from ur5e import UR5e
 
@@ -90,7 +91,7 @@ def log_latency(action, start_time):
     print(c.GREEN + f"LOGGED LATENCY: {latency:.4f} seconds for Action: {action}" + c.END)
 
 if __name__ == "__main__":
-    machine = UR5e(host="192.168.1.10")
+    machine = UR5e(host="192.168.1.5")
     machine.connect()
 
     uri = "wss://stream-digitaltwin.com/machine"
